@@ -1,24 +1,41 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from "react";
+import Home from "./components/Home";
+import Quiz from "./components/Quiz";
 
 function App() {
+  const [shown, setShown] = useState(true);
+  const [quizData, setQuizData] = useState([]);
+  const [selectedOption, setSelectedOption] = useState("");
+  useEffect(() => {
+    fetch("https://opentdb.com/api.php?amount=5")
+      .then((res) => res.json())
+      .then((data) => setQuizData(data.results));
+  }, []);
+
+  const handleOptionClick = (answer) => {
+    setSelectedOption(answer);
+  };
+  function togglePage() {
+    setShown(!shown);
+  }
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <React.Fragment>
+      {shown && <Home onToggle={togglePage} />}
+      {!shown && (
+        <div>
+          {quizData.map((item) => (
+            <Quiz
+              key={item.question}
+              question={item.question}
+              incorrectAnswers={item.incorrect_answers}
+              correctAnswer={item.correct_answer}
+              selectedAnswer={selectedOption}
+              onAnswerSelect={handleOptionClick}
+            />
+          ))}
+        </div>
+      )}
+    </React.Fragment>
   );
 }
 
